@@ -10,37 +10,49 @@ class MyApp extends StatelessWidget {
   //build method describes how to display the widget in terms of other lower level widgets
   Widget build(BuildContext context) {
     return MaterialApp(
-      //title: 'Welcome to Flutter',
-      //Scaffold is a widget provides default app bar, title and body properties
-      //home: Scaffold(
+      //title: 'Startup Name Generator',
       title: 'Startup Name Generator',
+      theme: ThemeData(
+        primaryColor: Colors.red,
+      ),
         home: RandomWords(),
-        //appBar: AppBar(
-          //title: Text('Welcome to Flutter'),
-        //),
-        //body: Center(
-         // child: RandomWords(),
+
         );
-     // ),
-    //);
   }
 }
 
 //Most of the app's logic is in State, maintains the state for RandomWords widget
 class RandomWordsState extends State<RandomWords> {
   @override
-  Widget build(BuildContext context) {
     //"_" prefix enforces privacy in Dart
     final _suggestions = <WordPair>[];
+    final Set<WordPair> _saved = Set<WordPair>();
     final _biggerFont = const TextStyle(fontSize: 18.0);
 
     //Display each new pairs in a ListTile allows to maje the rows more attractive
     Widget _buildRow(WordPair pair) {
+      final alreadySaved = _saved.contains(pair);
+
       return ListTile(
         title: Text(
           pair.asPascalCase,
           style: _biggerFont,
         ),
+        //Add an heart icon
+        trailing: Icon(
+          alreadySaved ? Icons.favorite : Icons.favorite_border,
+          color: alreadySaved ? Colors.red : null,
+        ),
+        //When icon is tapped
+        onTap: () {
+          setState(() {
+            if (alreadySaved) {
+              _saved.remove(pair);
+            } else {
+              _saved.add(pair);
+            }
+          });
+        },
       );
     }
 
@@ -55,8 +67,8 @@ class RandomWordsState extends State<RandomWords> {
             if (i.isOdd) return Divider();
 
             //divides i by 2 and returns an integer result
-            final index = i ~/2;
-            if(index >= _suggestions.length) {
+            final index = i ~/ 2;
+            if (index >= _suggestions.length) {
               //if the end is reached, generate 10 more word pairings and add them to suggestion list
               _suggestions.addAll(generateWordPairs().take(10));
             }
@@ -66,14 +78,51 @@ class RandomWordsState extends State<RandomWords> {
 
     //final wordPair = WordPair.random();
     //return Text(wordPair.asPascalCase);
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Startup Name Generator'),
+          actions: <Widget>[
+            //We pass list of selected objects to new view
+            IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+          ],
+        ),
+        body: _buildSuggestions(),
+      );
+    }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Startup Name Generator'),
+  void _pushSaved() {
+      //Navigate and create the other view
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          final Iterable<ListTile> tiles = _saved.map(
+                (WordPair pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _biggerFont,
+                ),
+              );
+            },
+          );
+          final List<Widget> divided = ListTile
+              .divideTiles(
+            context: context,
+            tiles: tiles,
+          ).toList();
+
+          //Scaffold is a widget provides default app bar, title and body properties
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
+            ),
+            body: ListView(children: divided),
+          );
+        },
       ),
-      body: _buildSuggestions(),
     );
-
   }
 }
 
