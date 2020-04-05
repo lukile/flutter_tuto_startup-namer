@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
+import 'package:startupnamer/layout.dart';
+
+import 'apiPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -84,8 +87,10 @@ class RandomWordsState extends State<RandomWords> {
         appBar: AppBar(
           title: Text('Startup Name Generator'),
           actions: <Widget>[
+            IconButton(icon: Icon(Icons.ac_unit), onPressed: _layout),
             //We pass list of selected objects to new view
             IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+            IconButton(icon: Icon(Icons.adb), onPressed: _accesApi),
           ],
         ),
         body: _buildSuggestions(),
@@ -123,6 +128,31 @@ class RandomWordsState extends State<RandomWords> {
         },
       ),
     );
+  }
+
+  void _layout() {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => Layout()
+              /*(BuildContext context) {
+            return MaterialApp(
+              title: 'Flutter layout demo',
+              home: Scaffold(
+                appBar: AppBar(
+                  title: Text('Flutter layout demo'),
+                ),
+                body: Center(
+                  child: Text('Hello World'),
+                ),
+              ),
+            );
+          }*/
+        )
+      );
+  }
+
+  void _accesApi() {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ApiPage()));
   }
 }
 
